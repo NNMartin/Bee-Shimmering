@@ -4,6 +4,6 @@ Purpose:
 
 Parameters of interest:
 
-refractory period: 200 ms?
+refractory period: 200 ms? # Could have sworn it was 800; Leo
 time step: 20 ms
 activation time: 67 ms
