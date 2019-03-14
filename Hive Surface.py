@@ -2,15 +2,21 @@ import Bee_Files
 import Helper
 from random import random
 from copy import deepcopy
+import pygame
+
 
 # Time step is assumed to be 20ms
-
 REFRACTION = 40
 ACTIVATION = 3
-TOTAL_TIME = 25
+TOTAL_TIME = 65
 CHANCE_TO_BE_ACTIVATABLE = 0.58
 BEES_X_DIM = 100
 BEES_Y_DIM = 100
+
+# Initialization of Drawing Stuffs(very professional vocabulary here)
+pygame.init()
+surf = pygame.display.set_mode((BEES_X_DIM, BEES_Y_DIM))
+pygame.display.set_caption("Shimmering Simulation")
 
 # generate the hive surface
 Hive = []
@@ -28,6 +34,7 @@ relation_matrix = [[0, 0.1, 0.25, 0.1, 0], [0.05, 0.15, 0.3, 0.15, 0.05], [0.2, 
                    [0.2, 0.6, 0, 0.6, 0.2],  [0.2, 0.3, 0.6, 0.3, 0.2], [0.05, 0.15, 0.3, 0.15, 0.05],
                    [0, 0.1, 0.25, 0.1, 0]]
 Threshold = 0.5
+
 
 # actual simulation
 for t in range(TOTAL_TIME):
@@ -48,4 +55,4 @@ for t in range(TOTAL_TIME):
                     Hive[col_ind][row_ind].update_pulse(True)
                 else:
                     Hive[col_ind][row_ind].update_pulse()
-    Helper.print_hive(Hive, "HIVE: " + str(t))  # placeholder display
+    Helper.print_hive(Hive, surf)  # Slightly better placeholder display
