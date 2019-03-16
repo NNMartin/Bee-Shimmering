@@ -4,6 +4,6 @@ Purpose:
 
 Parameters of interest:
 
-refractory period: 200 ms? # Could have sworn it was 800; Leo
+refractory period: 200 ms? # Could have sworn it was 800; Leo. I think it depends on which paper your read. Let's stick to 800 ms; Alan
 time step: 20 ms
 activation time: 67 ms
