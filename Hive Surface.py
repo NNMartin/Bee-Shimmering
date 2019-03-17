@@ -8,14 +8,17 @@ import pygame
 # Time step is assumed to be 20ms
 REFRACTION = 40  # This is how long it takes for the bee to be able to be activated again, in time steps
 ACTIVATION = 3   # This is how long a bee will be activated for in time steps
-TOTAL_TIME = 50  # The number of time steps the simulation will run for; may need to be changed for slower waves
+TOTAL_TIME = 30  # The number of time steps the simulation will run for; may need to be changed for slower waves
 CHANCE_TO_BE_ACTIVATABLE = 0.58  # This is the probability that it is even possible to activate the bee
 BEES_X_DIM = 101  # This is the size of the hive in the X direction, in number of bees
 BEES_Y_DIM = 101  # This is the size of the hive in the Y direction, in number of bees
+BEES_X_SIZE = 1  # The size of the Bee in the X direction
+BEES_Y_SIZE = 3  # The size of the Bee in the Y direction
 
 # Initialization of Drawing Stuffs(very professional vocabulary here)
 pygame.init()
-surf = pygame.display.set_mode((BEES_X_DIM, BEES_Y_DIM))  # This determines the dimensions of the hive Surface display
+# This determines the dimensions of the hive Surface display
+surf = pygame.display.set_mode((BEES_X_DIM*BEES_X_SIZE, BEES_Y_DIM*BEES_Y_SIZE))
 pygame.display.set_caption("Shimmering Simulation")
 
 # generate the hive surface, creating a 2 dim "array", with the same dim as the screen
@@ -68,4 +71,4 @@ for t in range(TOTAL_TIME):
                 else:
                     Hive[col_ind][row_ind].update_pulse()
     # This simply updates the display window.
-    Helper.print_hive(Hive, surf)  # Slightly better placeholder display
+    Helper.print_hive(Hive, surf, (BEES_X_SIZE, BEES_Y_SIZE))  # Slightly better placeholder display

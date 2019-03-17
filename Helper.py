@@ -1,10 +1,11 @@
 import pygame
 
 
-def print_hive(hive, surf):  # This is the main  hive reprinting function
+def print_hive(hive, surf, sizes):  # This is the main  hive reprinting function
     """
     :param hive: [][] Bees
     :param surf: pygame.Surface
+    :param sizes: (int, int)
     :return:
     """
     # This basically just uses a helper function to create a more easily reader version of the hive to print from;
@@ -15,9 +16,11 @@ def print_hive(hive, surf):  # This is the main  hive reprinting function
     for x in range(len(h_map)):
         for y in range(len(h_map[x])):
             if h_map[x][y] == "1":
-                pygame.draw.line(surf, (255, 255, 255), (x, y), (x, y), 1)
+                pygame.draw.line(surf, (255, 255, 255), (x*sizes[0], y*sizes[1]),
+                                 ((x+1)*sizes[0]-1, (y+1)*sizes[1]-1), 1)
             else:
-                pygame.draw.line(surf, (0, 0, 0), (x, y), (x, y), 1)
+                pygame.draw.line(surf, (0, 0, 0), (x*sizes[0], y*sizes[1]),
+                                 ((x+1)*sizes[0]-1, (y+1)*sizes[1]-1), 1)
     pygame.display.update()  # This refreshes the screen
 
 
