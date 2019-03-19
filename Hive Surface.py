@@ -29,6 +29,7 @@ for x in range(BEES_X_DIM):
         Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, random() < CHANCE_TO_BE_ACTIVATABLE))
     Hive.append(Bee_col)
 
+
 # This creates the generator bee; to be frank this could also have been done with a bit more elegance, but it was
 # creating a few to many bugs in the first version of the code; so I made it manual, it's a quick fix to make this work
 # for multiple generator bees; if you can't do it just let me know and I'll write a patch

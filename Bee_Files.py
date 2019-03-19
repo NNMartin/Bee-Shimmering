@@ -62,6 +62,17 @@ class Bee:
         # This is for something that was originally scrapped, but might be useful later so I kept it in.
         pass
 
+    def __str__(self):
+        """ :return: str
+        """
+        if self.is_active:
+            return "Active"
+        else:
+            return "Inactive"
+
+    def __repr__(self):
+        return str(self)
+
 
 class GeneratorBee(Bee):
     """
@@ -83,3 +94,4 @@ class GeneratorBee(Bee):
         # allow.
         self.is_active = True
         self.time_since_last_activation_pulse = 0
+
