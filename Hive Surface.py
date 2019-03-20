@@ -10,10 +10,11 @@ REFRACTION = 40  # This is how long it takes for the bee to be able to be activa
 ACTIVATION = 3   # This is how long a bee will be activated for in time steps
 TOTAL_TIME = 30  # The number of time steps the simulation will run for; may need to be changed for slower waves
 CHANCE_TO_BE_ACTIVATABLE = 0.58  # This is the probability that it is even possible to activate the bee
+DECISION_THERE = 1  # Whether bees decide to be inactive before (0) or during (1) simulation
 BEES_X_DIM = 101  # This is the size of the hive in the X direction, in number of bees
 BEES_Y_DIM = 101  # This is the size of the hive in the Y direction, in number of bees
 BEES_X_SIZE = 1  # The size of the Bee in the X direction
-BEES_Y_SIZE = 3  # The size of the Bee in the Y direction
+BEES_Y_SIZE = 1  # The size of the Bee in the Y direction
 
 # Initialization of Drawing Stuffs(very professional vocabulary here)
 pygame.init()
@@ -26,7 +27,7 @@ Hive = []
 for x in range(BEES_X_DIM):
     Bee_col = []
     for y in range(BEES_Y_DIM):
-        Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, random() < CHANCE_TO_BE_ACTIVATABLE))
+        Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, (1-DECISION_THERE)*random() < CHANCE_TO_BE_ACTIVATABLE))
     Hive.append(Bee_col)
 
 
@@ -38,7 +39,8 @@ Hive[generator_location[0]][generator_location[1]] = Bee_Files.GeneratorBee(REFR
 
 # at the moment these numbers are just place holders for a PoC; must be odd by odd, though not necessarily rectangular.
 relation_matrix = [[1/(68**(1/2)), 1/(29**(1/2)), 1/2, 1/(29**(1/2)), 1/(68**(1/2))],
-                   [1/(26**(1/2)), 1, 1, 1, 1/(26**(1/2))], [1/5, 1, 0, 1, 1/5],
+                   [1/(26**(1/2)), 1, 1, 1, 1/(26**(1/2))], 
+                   [1/5, 1, 0, 1, 1/5],
                    [1/(26**(1/2)), 1, 1, 1, 1/(26**(1/2))],
                    [1/(68**(1/2)), 1/(29**(1/2)), 1/2, 1/(29**(1/2)), 1/(68**(1/2))]]
 # This is the threshold to which the bee needs to receive input before becoming active, Honestly probably should be
@@ -67,6 +69,7 @@ for t in range(TOTAL_TIME):
                         if Last_Hive_State[(col_ind+x_modifier) % BEES_X_DIM][(row_ind+y_modifier) % BEES_Y_DIM].is_it_active():
                             Act_val += relation_matrix[mod_x_ind][mod_y_ind]
                 # If the bee receives enough of a signal it will be told to activate, else it will not be.
+                Act_val=Act_val*(1-DECISION_THERE*round(0.5*random()/CHANCE_TO_BE_ACTIVATABLE,0))
                 if Act_val >= Threshold:
                     Hive[col_ind][row_ind].update_pulse(True)
                 else:
