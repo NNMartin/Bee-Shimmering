@@ -16,11 +16,9 @@ def print_hive(hive, surf, sizes):  # This is the main  hive reprinting function
     for x in range(len(h_map)):
         for y in range(len(h_map[x])):
             if h_map[x][y] == "1":
-                pygame.draw.line(surf, (255, 255, 255), (x*sizes[0], y*sizes[1]),
-                                 ((x+1)*sizes[0]-1, (y+1)*sizes[1]-1), 1)
+                pygame.draw.rect(surf, (255, 255, 255), (x*sizes[0], y*sizes[1], sizes[0], sizes[1]))
             else:
-                pygame.draw.line(surf, (0, 0, 0), (x*sizes[0], y*sizes[1]),
-                                 ((x+1)*sizes[0]-1, (y+1)*sizes[1]-1), 1)
+                pygame.draw.rect(surf, (0, 0, 0), (x * sizes[0], y * sizes[1], sizes[0], sizes[1]))
     pygame.display.update()  # This refreshes the screen
 
 
