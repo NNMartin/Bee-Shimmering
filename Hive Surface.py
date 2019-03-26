@@ -162,7 +162,7 @@ for t in range(1,WAVE_TIME):
 plt.figure()
 plt.plot(NUMBER_PARTICIPANTS),plt.ylabel('Number Shimmering Bees'),plt.xlabel('time (20 ms)')
 plt.figure()
-plt.plot((np.sum(np.sum(SPEEDS,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME])[1:]),plt.ylabel('Bee speeds (mm/ms)'),plt.xlabel('time (20 ms)')
+plt.plot((np.sum(np.sum(SPEEDS,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME])[1:]),plt.ylabel('Wave speed (mm/ms)'),plt.xlabel('time (20 ms)')
 
 print("Wave lasted %s seconds" % (0.02*WAVE_TIME))
 
