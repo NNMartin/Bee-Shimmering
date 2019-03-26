@@ -36,7 +36,7 @@ if DISPLAY:
     # Initialization of Drawing Stuffs(very professional vocabulary here)
     pygame.init()
     # This determines the dimensions of the hive Surface display
-    surf = pygame.display.set_mode((BEES_X_DIM*BEES_X_SIZE, BEES_Y_DIM*BEES_Y_SIZE))
+    surf = pygame.display.set_mode(((int)(BEES_X_DIM*BEES_X_SIZE), (int)(BEES_Y_DIM*BEES_Y_SIZE)))
     pygame.display.set_caption("Shimmering Simulation")
 else:
     surf = ""  # Placeholder to stop warnings
@@ -144,7 +144,7 @@ for t in range(TOTAL_TIME):
 
 #    # This simply updates the display window.
     if DISPLAY:
-        Helper.print_hive(Hive, surf, (BEES_X_SIZE, BEES_Y_SIZE))  # runs the display
+        Helper.print_hive(Hive, surf, ((int)(BEES_X_SIZE), (int)(BEES_Y_SIZE)))  # runs the display
 
 if TIME:
     print("--- %s seconds ---\n" % (time.time() - start_time))
