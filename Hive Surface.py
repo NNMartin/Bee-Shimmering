@@ -62,35 +62,36 @@ Hive[generator_location[0]][generator_location[1]] = Bee_Files.GeneratorBee(REFR
 
 # at the moment these numbers are just place holders for a PoC; must be odd by odd, though not necessarily rectangular.
 R = np.zeros([BEES_Y_DIM,BEES_X_DIM])
-R[BEES_Y_DIM-2,BEES_X_DIM-2]=1/(68**(1/2))
-R[BEES_Y_DIM-2,BEES_X_DIM-1]=1/(29**(1/2))
-R[BEES_Y_DIM-2,0]=1/2
-R[BEES_Y_DIM-2,1]=1/(29**(1/2))
-R[BEES_Y_DIM-2,2]=1/(68**(1/2))
 
-R[BEES_Y_DIM-1,BEES_X_DIM-2]=1/(26**(1/2))
-R[BEES_Y_DIM-1,BEES_X_DIM-1]=1
-R[BEES_Y_DIM-1,0]=1
-R[BEES_Y_DIM-1,1]=1
-R[BEES_Y_DIM-1,2]=1/(26**(1/2))
+R[BEES_Y_DIM-2,BEES_X_DIM-2]=   1/(68**(1/2))
+R[BEES_Y_DIM-2,BEES_X_DIM-1]=   1/(29**(1/2))
+R[BEES_Y_DIM-2,0]=              1/2
+R[BEES_Y_DIM-2,1]=              1/(29**(1/2))
+R[BEES_Y_DIM-2,2]=              1/(68**(1/2))
 
-R[0,BEES_X_DIM-2]=1/5
-R[0,BEES_X_DIM-1]=1
-R[0,0]=0
-R[0,1]=1
-R[0,2]=1/5   
+R[BEES_Y_DIM-1,BEES_X_DIM-2]=   1/(26**(1/2))
+R[BEES_Y_DIM-1,BEES_X_DIM-1]=   1
+R[BEES_Y_DIM-1,0]=              1
+R[BEES_Y_DIM-1,1]=              1
+R[BEES_Y_DIM-1,2]=              1/(26**(1/2))
 
-R[1,BEES_X_DIM-2]=1/(26**(1/2))
-R[1,BEES_X_DIM-1]=1
-R[1,0]=1
-R[1,1]=1
-R[1,2]=1/(26**(1/2))
+R[0,BEES_X_DIM-2]=              1/5
+R[0,BEES_X_DIM-1]=              1
+R[0,0]=                         0
+R[0,1]=                         1
+R[0,2]=                         1/5   
+                
+R[1,BEES_X_DIM-2]=              1/(26**(1/2))
+R[1,BEES_X_DIM-1]=              1
+R[1,0]=                         1
+R[1,1]=                         1
+R[1,2]=                         1/(26**(1/2))
 
-R[2,BEES_X_DIM-2]=1/(68**(1/2))
-R[2,BEES_X_DIM-1]=1/(29**(1/2))
-R[2,0]=1/2
-R[2,1]=1/(29**(1/2))
-R[2,2]=1/(68**(1/2))
+R[2,BEES_X_DIM-2]=              1/(68**(1/2))
+R[2,BEES_X_DIM-1]=              1/(29**(1/2))
+R[2,0]=                         1/2
+R[2,1]=                         1/(29**(1/2))
+R[2,2]=                         1/(68**(1/2))
 
 Y_dist=np.arange(BEES_Y_DIM)-(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)-np.abs(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)
 X_dist=np.arange(BEES_X_DIM)-(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)-np.abs(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)
