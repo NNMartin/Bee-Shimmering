@@ -35,3 +35,15 @@ def bit_map(hive):
             else:
                 printer[y] += "0"
     return printer
+
+
+def dist(x1, y1, x2, y2, mods):
+    """ Returns euclidean distance
+    :param int x1:
+    :param int y1:
+    :param int x2:
+    :param int y2:
+    :param (int, int) mods:
+    :return: float
+    """
+    return ((abs(x1-x2) % mods[0])**2 + (abs(y1-y2) % mods[1])**2)**(1/2)

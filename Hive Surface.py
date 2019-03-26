@@ -4,6 +4,7 @@ from random import random
 from copy import deepcopy  # this import is actually really important due to the way pointers work in computer data
 import pygame
 import time
+import statistics
 
 TIME = True  # Whether to time the length of code running
 
@@ -25,6 +26,8 @@ BEES_Y_DIM = 101  # This is the size of the hive in the Y direction, in number o
 BEES_X_SIZE = 5  # The size of the Bee in the X direction
 BEES_Y_SIZE = 5  # The size of the Bee in the Y direction
 DISPLAY = True  # To display, or not to display?
+PRINT_SPEED = True  # Whether to output the wave speed info to the console
+SAVE_SPEEDS = True  # only works if PRINT_SPEED IS TRUE, saves a txt file with a list of all speeds, sorted
 
 if DISPLAY:
     # Initialization of Drawing Stuffs(very professional vocabulary here)
@@ -37,11 +40,15 @@ else:
 
 # generate the hive surface, creating a 2 dim "array", with the same dim as the screen
 Hive = []
+First_activations = []  # This records the time of first activation for a bee (excluding the generator)
 for x in range(BEES_X_DIM):
     Bee_col = []
+    Act_col = []
     for y in range(BEES_Y_DIM):
         Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, random() < CHANCE_TO_BE_ACTIVATABLE))
+        Act_col.append(-1)
     Hive.append(Bee_col)
+    First_activations.append(Act_col)
 
 
 # This creates the generator bee; to be frank this could also have been done with a bit more elegance, but it was
@@ -74,7 +81,10 @@ for t in range(TOTAL_TIME):
                 # Here we start to extract the modifiers from the relationship matrix; then add them to the Act_val iff
                 # the bee for which they function is active; note it makes the hive surface into a Torus because of the
                 # %(modulus) in the if statement
-                if not Hive[col_ind][row_ind].get_has_activated():
+                if not (Hive[col_ind][row_ind].get_has_activated() or # This should speed up the initial slow code part
+                        Helper.dist(col_ind, row_ind, generator_location[0], generator_location[1],
+                                    (BEES_X_DIM, BEES_Y_DIM))
+                        > t*Helper.dist(SAL_X_DIFF, SAL_Y_DIFF, 0, 0, (BEES_X_DIM, BEES_Y_DIM))):
                     for mod_x_ind in range(len(relation_matrix)):
                         x_modifier = mod_x_ind - ((len(relation_matrix)-1)//2)
                         for mod_y_ind in range(len(relation_matrix[mod_x_ind])):
@@ -107,11 +117,36 @@ for t in range(TOTAL_TIME):
                     # If the bee receives enough of a signal it will be told to activate, else it will not be.
                 if Act_val >= Threshold:
                     Hive[col_ind][row_ind].update_pulse(True)
+                    First_activations[col_ind][row_ind] = t
                 else:
                     Hive[col_ind][row_ind].update_pulse()
     # This simply updates the display window.
     if DISPLAY:
         Helper.print_hive(Hive, surf, (BEES_X_SIZE, BEES_Y_SIZE))  # runs the display
+
+# This actually takes a comparably insignificant amount of time wrt the rest of the code
+if PRINT_SPEED:  # Speed is topological distance per time step atm
+    speeds = []  # A list of all speeds
+    for x in range(len(First_activations)):
+        for y in range(len(First_activations[x])):
+            if First_activations[x][y] > -1:  # checks whether a valid time was recorded, to ignore
+                speed = Helper.dist(x, y, generator_location[0],
+                                    generator_location[1], (BEES_X_DIM, BEES_Y_DIM)) / First_activations[x][y]
+                speeds.append(speed)
+    mean_speed = statistics.mean(speeds)
+    median_speed = statistics.median(speeds)
+    max_speed = max(speeds)
+    min_speed = min(speeds)
+
+    print("Median speed: " + str(median_speed) + " distance / time step")
+    print("Mean speed: " + str(mean_speed) + " distance / time step")
+    print("Top speed: " + str(max_speed) + " distance / time step")
+    print("Bottom speed: " + str(min_speed) + " distance / time step")
+    if SAVE_SPEEDS:
+        speeds.sort()
+        with open('Speeds.txt', 'w') as f:  # change the string "Speeds.txt" to smt else if you want to make a diff file
+            for item in speeds:
+                f.write("%s\n" % item)
 
 if TIME:
     print("--- %s seconds ---" % (time.time() - start_time))
