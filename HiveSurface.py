@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 # setting a seed. We can change this later, but useful when running simulations
 # for a single parameter.
-np.random.seed(10)
+np.random.seed(1567)
 
 #REFRACTION, ACTIVATION, TOTAL_TIME in units of timesteps, BEES_SALT_LEN in mm!!!
 def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
@@ -78,12 +78,18 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
     # This creates the generator bee; to be frank this could also have been done with a bit more elegance, but it was
     # creating a few to many bugs in the first version of the code; so I made it manual, it's a quick fix to make this work
     # for multiple generator bees; if you can't do it just let me know and I'll write a patch
-    generator_location = (0, 0)
+    generator_location = (51, 51)
     Hive[generator_location[0]][generator_location[1]] = Bee_Files.GeneratorBee(REFRACTION, ACTIVATION, True)
 
     #R is the relation matrix. It calls a pattern from the helper file. Let's stick with geometric_scaled for simulations
-    R = Helper.relation_matrix('geometric_scaled',BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,5.0,3)
-
+    R = Helper.relation_matrix('geometric_scaled',BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,10.0,3)
+    plt.imshow(R[:10,:10]),plt.colorbar()
+    plt.figure()
+    plt.imshow(R[:10,90:]),plt.colorbar()
+    plt.figure()
+    plt.imshow(R[90:,:10]),plt.colorbar()
+    plt.figure()
+    plt.imshow(R[90:,90:]),plt.colorbar()
     #S is the saltatoric matrix. Here I'vewritten it so it's the units that are less than or equal to
     #BEES_SALT_DIM (in units of mm!) away from (0,0).
     S=np.heaviside(BEES_SALT_LEN-DIST_MATRIX,1)
