@@ -60,3 +60,57 @@ def dist(x1, y1, x2, y2, mods):
     :return: float
     """
     return ((abs(x1-x2) % mods[0])**2 + (abs(y1-y2) % mods[1])**2)**(1/2)
+
+#return a matrix whose entries are the distances to (0,0) in units of mm
+def geo_dist_matrix(BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM):
+    Y_dist=BEES_Y_WIDTH*(np.arange(BEES_Y_DIM)-(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)-np.abs(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0))
+    X_dist=BEES_X_WIDTH*(np.arange(BEES_X_DIM)-(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)-np.abs(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0))
+    Y_dist_matrix = np.resize(np.tile(Y_dist,BEES_X_DIM),[BEES_X_DIM,BEES_Y_DIM])
+    X_dist_matrix = np.transpose(np.resize(np.tile(X_dist,BEES_Y_DIM),[BEES_Y_DIM,BEES_X_DIM]))
+    Dist_matrix=np.sqrt(Y_dist_matrix*Y_dist_matrix+X_dist_matrix*X_dist_matrix)
+    return Dist_matrix
+
+def topo_dist_matrix(BEES_X_DIM,BEES_Y_DIM):
+    Y_dist=(np.arange(BEES_Y_DIM)-(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)-np.abs(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0))
+    X_dist=(np.arange(BEES_X_DIM)-(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)-np.abs(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0))
+    Y_dist_matrix = np.resize(np.tile(Y_dist,BEES_X_DIM),[BEES_X_DIM,BEES_Y_DIM])
+    X_dist_matrix = np.transpose(np.resize(np.tile(X_dist,BEES_Y_DIM),[BEES_Y_DIM,BEES_X_DIM]))
+    Dist_matrix = Y_dist_matrix+X_dist_matrix
+    return Dist_matrix
+    
+    
+def relation_matrix(pattern,BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,strength,radius):
+    R = np.zeros([BEES_X_DIM,BEES_Y_DIM])
+
+    if pattern == 'geometric_scaled': #radius is interpreted as the length of the grid
+        D=geo_dist_matrix(BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM)
+        R[:radius,:radius] = 1.0/D[:radius,:radius]
+        R[:radius,BEES_Y_DIM-radius:] = 1.0/D[:radius,BEES_Y_DIM-radius:]
+        R[BEES_X_DIM-radius:,:radius] = 1.0/D[BEES_X_DIM-radius:,:radius]
+        R[BEES_X_DIM-radius:,BEES_Y_DIM-radius:] = 1.0/D[BEES_X_DIM-radius:,BEES_Y_DIM-radius:]
+        R[0,0]=0
+        R = strength*R/np.sum(R)
+        
+    elif pattern == 'geometric_uniform': #radius is interpreted as the distance in mm to cut off 
+        D=geo_dist_matrix(BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM)
+        R = np.heaviside(radius-D,1)
+        R[0,0]=0
+        
+    elif pattern == 'topological_scaled': #radius is interpreted as the length of the grid
+        D=topo_dist_matrix(BEES_X_DIM,BEES_Y_DIM)
+        R[:radius,:radius] = 1.0/D[:radius,:radius]
+        R[:radius,BEES_Y_DIM-radius:] = 1.0/D[:radius,BEES_Y_DIM-radius:]
+        R[BEES_X_DIM-radius:,:radius] = 1.0/D[BEES_X_DIM-radius:,:radius]
+        R[BEES_X_DIM-radius:,BEES_Y_DIM-radius:] = 1.0/D[BEES_X_DIM-radius:,BEES_Y_DIM-radius:]
+        R[0,0]=0
+        R = strength*R/np.sum(R)
+        
+    elif pattern == 'topological_uniform': #radius is interpreted as the distance in mm to cut off
+        D=topo_dist_matrix(BEES_X_DIM,BEES_Y_DIM)
+        R = np.heaviside(radius-D,1)
+        R[0,0]=0
+    
+    else:
+        print("INVALID PATTERN")
+        
+    return R

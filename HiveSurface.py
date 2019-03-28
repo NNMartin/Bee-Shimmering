@@ -13,9 +13,10 @@ from matplotlib import pyplot as plt
 # for a single parameter.
 np.random.seed(10)
 
-def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60, Threshold=0.5,
+#REFRACTION, ACTIVATION, TOTAL_TIME in units of timesteps, BEES_SALT_LEN in mm!!!
+def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
                 CHANCE_TO_BE_ACTIVATABLE=0.58, CHANCE_OF_SALTATORY_PROP=0.001,
-                DISPLAY = False, TIME = True, plots=False, ret=False):
+                BEES_SALT_LEN=30.0, DISPLAY = False, TIME = True, plots=False, ret=False):
     """
     :param REFRACTION: how many ticks the bee must rest for between activations
     :param int ACTIVATION: how many ticks the bee will remain active for
@@ -39,13 +40,17 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60, Threshold=0.5,
     else:
         start_time = 0
 
+    TIME_STEP = 0.02 #20 ms
+    BEES_X_WIDTH = 6.0 #6 mm
+    BEES_Y_WIDTH = 3*BEES_X_WIDTH #Let's keep this constant
     ACTIVATION_MODE = 1 #1 = choose to activate on a per signal, 0 = choose to ignore all
-    SAL_X_DIFF = 5.0  # The possible delta X between the wave and bee for Sal-Prop
-    SAL_Y_DIFF = 5.0  # The possible delta Y between the wave and bee for Sal-Prop
     BEES_X_DIM = 100  # This is the size of the hive in the X direction, in number of bees
     BEES_Y_DIM = 100  # This is the size of the hive in the Y direction, in number of bees
-    BEES_X_SIZE = 5.0  # The size of the Bee in the X direction
-    BEES_Y_SIZE = 5.0  # The size of the Bee in the Y direction
+    Threshold = 0.5
+    #a matrix of distances to (0,0) in units mm
+    DIST_MATRIX = Helper.geo_dist_matrix(BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM) 
+    BEES_X_SIZE = 1  # The size of the Bee in the X direction in pixels
+    BEES_Y_SIZE = 3*BEES_X_SIZE  # The size of the Bee in the Y direction
 
     if DISPLAY:
         # Initialization of Drawing Stuffs(very professional vocabulary here)
@@ -55,6 +60,7 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60, Threshold=0.5,
         pygame.display.set_caption("Shimmering Simulation")
     else:
         surf = ""  # Placeholder to stop warnings
+
 
     # generate the hive surface, creating a 2 dim "array", with the same dim as the screen
     Hive = []
@@ -75,85 +81,59 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60, Threshold=0.5,
     generator_location = (0, 0)
     Hive[generator_location[0]][generator_location[1]] = Bee_Files.GeneratorBee(REFRACTION, ACTIVATION, True)
 
-    # at the moment these numbers are just place holders for a PoC; must be odd by odd, though not necessarily rectangular.
-    R = np.zeros([BEES_Y_DIM,BEES_X_DIM])
+    #R is the relation matrix. It calls a pattern from the helper file. Let's stick with geometric_scaled for simulations
+    R = Helper.relation_matrix('geometric_scaled',BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,5.0,3)
 
-    R[BEES_Y_DIM-2,BEES_X_DIM-2]=   1/(68**(1/2))
-    R[BEES_Y_DIM-2,BEES_X_DIM-1]=   1/(29**(1/2))
-    R[BEES_Y_DIM-2,0]=              1/2
-    R[BEES_Y_DIM-2,1]=              1/(29**(1/2))
-    R[BEES_Y_DIM-2,2]=              1/(68**(1/2))
+    #S is the saltatoric matrix. Here I'vewritten it so it's the units that are less than or equal to
+    #BEES_SALT_DIM (in units of mm!) away from (0,0).
+    S=np.heaviside(BEES_SALT_LEN-DIST_MATRIX,1)
 
-    R[BEES_Y_DIM-1,BEES_X_DIM-2]=   1/(26**(1/2))
-    R[BEES_Y_DIM-1,BEES_X_DIM-1]=   1
-    R[BEES_Y_DIM-1,0]=              1
-    R[BEES_Y_DIM-1,1]=              1
-    R[BEES_Y_DIM-1,2]=              1/(26**(1/2))
-
-    R[0,BEES_X_DIM-1]=              1
-    R[0,0]=                         0
-    R[0,2]=                         1/5
-
-    R[1,BEES_X_DIM-2]=              1/(26**(1/2))
-    R[1,BEES_X_DIM-1]=              1
-    R[1,0]=                         1
-    R[1,1]=                         1
-    R[1,2]=                         1/(26**(1/2))
-
-    R[2,BEES_X_DIM-2]=              1/(68**(1/2))
-    R[2,BEES_X_DIM-1]=              1/(29**(1/2))
-    R[2,0]=                         1/2
-    R[2,1]=                         1/(29**(1/2))
-    R[2,2]=                         1/(68**(1/2))
-
-    Y_dist=np.arange(BEES_Y_DIM)-(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)-np.abs(np.arange(BEES_Y_DIM)-BEES_Y_DIM/2.0)
-    X_dist=np.arange(BEES_X_DIM)-(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)-np.abs(np.arange(BEES_X_DIM)-BEES_X_DIM/2.0)
-    Y_dist_matrix = np.resize(np.tile(Y_dist,BEES_X_DIM),[BEES_X_DIM,BEES_Y_DIM])
-    X_dist_matrix = np.transpose(np.resize(np.tile(X_dist,BEES_Y_DIM),[BEES_Y_DIM,BEES_X_DIM]))
-    Dist_matrix=6*np.sqrt(Y_dist_matrix*Y_dist_matrix+(BEES_X_SIZE/BEES_Y_SIZE)**2*X_dist_matrix*X_dist_matrix)
-
-    S=np.sqrt(Y_dist_matrix*Y_dist_matrix+(SAL_Y_DIFF/SAL_X_DIFF)**2*X_dist_matrix*X_dist_matrix)
-    S=np.heaviside(SAL_Y_DIFF-S,0)
-
-
-    # This is the threshold to which the bee needs to receive input before becoming active, Honestly probably should be
-    # replaced with something more complicated in the Bees at a later date
-
-
-    HIVE_STATE=np.zeros([TOTAL_TIME,BEES_X_DIM,BEES_Y_DIM])
+    #This is a matrix that will be 1 at (t,x,y) if the bee at (t,x,y) is activated and 0 otherwise;
+    #updated at the end of each loop.
+    ACTIVE_BEES=np.zeros([TOTAL_TIME,BEES_X_DIM,BEES_Y_DIM])
+    
+    
     # actual simulation; this is just a loop that runs for a certain number of iterations
     for t in range(TOTAL_TIME):
         if t == 0:  # This basically just makes sure that the generator bee activates
             Hive[generator_location[0]][generator_location[1]].activate()
-            HIVE_STATE[0]=np.zeros([BEES_X_DIM,BEES_Y_DIM])
-            HIVE_STATE[0,generator_location[0],generator_location[1]]=1
+            ACTIVE_BEES[0,generator_location[0],generator_location[1]]=1
 
         else:  # This is what the the actual iteration does
-            HIVE_STATE_TEMP=np.copy(HIVE_STATE[t-1])
-            HIVE_STATE_TEMP=np.real(np.fft.ifft2(np.fft.fft2(HIVE_STATE_TEMP)*np.fft.fft2(R)))
-            HIVE_STATE_TEMP=np.heaviside(HIVE_STATE_TEMP/Threshold-1,1)
+            #Take a copy of the previously activated bees:
+            PREV_ACT_BEES=np.copy(ACTIVE_BEES[t-1])
+            #This convolutes R with PREV_ACT_BEES to get a matrix of how much act. signal eahc bee is receiving
+            ACT_SIGNAL=np.real(np.fft.ifft2(np.fft.fft2(PREV_ACT_BEES)*np.fft.fft2(R)))
+            #This makes a matrix only with bees above the threshold (I have to use 0.99.. because the 
+            #fft has a very small error on the order of e-17 and might otherwise clip signals at 1 if I don't do this)
+            ACT_SIGNAL=np.heaviside(ACT_SIGNAL/Threshold-0.9999999,1)
+            #This randomly drops signals with a chance of 1-CHANCE_TO_BE_ACTIVATABLE
             if ACTIVATION_MODE==1:
-                HIVE_STATE_TEMP=CHANCE_TO_BE_ACTIVATABLE*HIVE_STATE_TEMP\
+                ACT_SIGNAL=CHANCE_TO_BE_ACTIVATABLE*ACT_SIGNAL\
                 -np.resize(np.random.rand(BEES_X_DIM*BEES_Y_DIM),[BEES_X_DIM,BEES_Y_DIM])
-                HIVE_STATE_TEMP=np.heaviside(HIVE_STATE_TEMP,0)
-
-            HIVE_STATE_TEMP_SALT=np.real(np.fft.ifft2(np.fft.fft2(HIVE_STATE[t-1])*np.fft.fft2(S)))
-            HIVE_STATE_TEMP_SALT=np.heaviside(HIVE_STATE_TEMP_SALT-0.5,1)
-            HIVE_STATE_TEMP_SALT=CHANCE_OF_SALTATORY_PROP*HIVE_STATE_TEMP_SALT\
+                ACT_SIGNAL=np.heaviside(ACT_SIGNAL,0)
+            
+            #Makes a matrix of bees that could salt. activate
+            SALT_ACT_SIGNAL=np.real(np.fft.ifft2(np.fft.fft2(PREV_ACT_BEES)*np.fft.fft2(S)))
+            SALT_ACT_SIGNAL=np.heaviside(SALT_ACT_SIGNAL-0.001,1)
+            #Drops signals with a 1-CHANCE_OF_SALTATORY_PROP chance
+            SALT_ACT_SIGNAL=CHANCE_OF_SALTATORY_PROP*SALT_ACT_SIGNAL\
                 -np.resize(np.random.rand(BEES_X_DIM*BEES_Y_DIM),[BEES_X_DIM,BEES_Y_DIM])
-            HIVE_STATE_TEMP_SALT=np.heaviside(HIVE_STATE_TEMP_SALT,0)
+            SALT_ACT_SIGNAL=np.heaviside(SALT_ACT_SIGNAL,0)
 
-            HIVE_STATE_TEMP=np.heaviside(HIVE_STATE_TEMP+HIVE_STATE_TEMP_SALT,0)
+            #GETS the total activation signal with salt.
+            ACT_SIGNAL=np.heaviside(ACT_SIGNAL+SALT_ACT_SIGNAL,0)
 
-
+            #Updates the hive
             for col_ind in range(len(Hive)):
                 for row_ind in range(len(Hive[col_ind])):
-                    if HIVE_STATE_TEMP[col_ind,row_ind]==1:
+                    if ACT_SIGNAL[col_ind,row_ind]==1:
                         Hive[col_ind][row_ind].update_pulse(True)
                     else:
                         Hive[col_ind][row_ind].update_pulse()
-
-            HIVE_STATE[t]= Helper.bit_map_in_int(Hive)
+            
+            #Updates ACTIVE_BEES
+            ACTIVE_BEES[t]= Helper.bit_map_in_int(Hive)
 
         # This simply updates the display window.
         if DISPLAY:
@@ -163,21 +143,32 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60, Threshold=0.5,
         print("--- %s seconds ---\n" % (time.time() - start_time))
 
     # This actually takes a comparably insignificant amount of time wrt the rest of the code
-    NUMBER_PARTICIPANTS = np.sum(np.sum(HIVE_STATE,1),1)
+    #Takes a sum of the number of active bees in each frame
+    NUMBER_PARTICIPANTS = np.sum(np.sum(ACTIVE_BEES,1),1)
+    #Calculates the nu ber of timesteps there was an active bee
     WAVE_TIME=np.int_(np.sum(np.heaviside(NUMBER_PARTICIPANTS,0)))
 
-    SPEEDS=np.zeros([WAVE_TIME,BEES_X_DIM,BEES_Y_DIM])
-    NEW_BEES=np.heaviside(HIVE_STATE[1:]-HIVE_STATE[:TOTAL_TIME-1],0)
-
+    #Will be a matrix with the value of the bee at (t,x,y) at the wavespeed (dist to (0,0)/timestep 
+    #of the bee if it activated then and 0 otherwise.
+    SPEEDS_MATRIX=np.zeros([WAVE_TIME,BEES_X_DIM,BEES_Y_DIM])
+    #This will have the average speed per time step
+    SPEEDS=np.zeros(TOTAL_TIME)
+    #Takes the difference between subsequent frames to see which new bees activated
+    NEW_BEES=np.heaviside(ACTIVE_BEES[1:]-ACTIVE_BEES[:TOTAL_TIME-1],0)
+    #I know, if loop, bad form, but doing it without would involve np.tile() and I don't want to think that hard
     for t in range(1,WAVE_TIME):
-        SPEEDS[t]=NEW_BEES[t-1]*Dist_matrix/(20*t)
+        #Updates speeds in m/s=mm/ms (1000* because TIME_STEP is in s)
+        SPEEDS_MATRIX[t]=NEW_BEES[t-1]*DIST_MATRIX/(1000*TIME_STEP*t)
+    
+    SPEEDS[:WAVE_TIME]=np.sum(np.sum(SPEEDS_MATRIX,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME]
+    
     if plots:
         plt.figure()
-        plt.plot(NUMBER_PARTICIPANTS),plt.ylabel('Number Shimmering Bees'),plt.xlabel('time (20 ms)')
+        plt.plot(20*np.arange(TOTAL_TIME),NUMBER_PARTICIPANTS),plt.ylabel('Number Shimmering Bees'),plt.xlabel('time (ms)')
         plt.figure()
-        plt.plot((np.sum(np.sum(SPEEDS,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME])[1:]),plt.ylabel('Wave speed (mm/ms)'),plt.xlabel('time (20 ms)')
-        print("Wave lasted %s seconds" % (0.02*WAVE_TIME))
+        plt.plot(20*np.arange(TOTAL_TIME),SPEEDS),plt.ylabel('Wave speed (m/s)'),plt.xlabel('time (ms)')
+        print("Wave lasted %s seconds" % (TIME_STEP*WAVE_TIME))
     if ret:
         #Need to calculate average wavespeed and max number of participants
         #placeholders below
-        return(["average wavespeed", 0.02*WAVE_TIME, "max number of participants"])
+        return(["average wavespeed", TIME_STEP*WAVE_TIME, "max number of participants"])
