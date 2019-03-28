@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 # setting a seed. We can change this later, but useful when running simulations
 # for a single parameter.
-np.random.seed(1567)
+np.random.seed(10)
 
 #REFRACTION, ACTIVATION, TOTAL_TIME in units of timesteps, BEES_SALT_LEN in mm!!!
 def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
