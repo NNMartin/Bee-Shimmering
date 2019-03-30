@@ -84,7 +84,7 @@ def relation_matrix(pattern,BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,stre
 
     if pattern == 'geometric_scaled': #radius is interpreted as the length of the grid
         D=geo_dist_matrix(BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM)
-        D[0,0]=0
+        D[0,0]=1
         R[:radius+1,:radius+1] = 1.0/D[:radius+1,:radius+1]
         R[:radius+1,BEES_Y_DIM-radius:] = 1.0/D[:radius+1,BEES_Y_DIM-radius:]
         R[BEES_X_DIM-radius:,:radius+1] = 1.0/D[BEES_X_DIM-radius:,:radius+1]
@@ -99,7 +99,7 @@ def relation_matrix(pattern,BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,stre
         
     elif pattern == 'topological_scaled': #radius is interpreted as the length of the grid
         D=topo_dist_matrix(BEES_X_DIM,BEES_Y_DIM)
-        D[0,0]=0
+        D[0,0]=1
         R[:radius+1,:radius+1] = 1.0/D[:radius+1,:radius+1]
         R[:radius+1,BEES_Y_DIM-radius:] = 1.0/D[:radius+1,BEES_Y_DIM-radius:]
         R[BEES_X_DIM-radius:,:radius+1] = 1.0/D[BEES_X_DIM-radius:,:radius+1]
