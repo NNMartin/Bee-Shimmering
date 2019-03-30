@@ -83,13 +83,13 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
             Bee_col = []
             for y in range(BEES_Y_DIM):
                 Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, np.mod(x+y,2)==1))
-                Hive.append(Bee_col)
+            Hive.append(Bee_col)
     else: #Square grid
         for x in range(BEES_X_DIM):
             Bee_col = []
             for y in range(BEES_Y_DIM):
                 Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, (1-ACTIVATION_MODE)*random() <= CHANCE_TO_BE_ACTIVATABLE))
-                Hive.append(Bee_col)                
+            Hive.append(Bee_col)                
 
 
     # This creates the generator bee; to be frank this could also have been done with a bit more elegance, but it was
@@ -178,8 +178,8 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
     
     SPEEDS[:WAVE_TIME]=np.sum(np.sum(SPEEDS_MATRIX,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME]
     
-    AVERAGE_SPEED=np.average(SPEED[10:np.argmax(NUMBER_PARTICIPANTS)])
-    STD_SPEED=np.std(SPEED[10:np.argmax(NUMBER_PARTICIPANTS)])
+    AVERAGE_SPEED=np.average(SPEEDS[10:np.argmax(NUMBER_PARTICIPANTS)])
+    STD_SPEED=np.std(SPEEDS[10:np.argmax(NUMBER_PARTICIPANTS)])
     MAX_PARTICIPANTS=np.amax(NUMBER_PARTICIPANTS)
     
     if plots:
