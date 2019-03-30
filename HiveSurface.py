@@ -8,26 +8,39 @@ import statistics
 import numpy as np
 from scipy import linalg as lin
 from matplotlib import pyplot as plt
+import cv2
+from cv2 import VideoWriter, VideoWriter_fourcc
 
 # setting a seed. We can change this later, but useful when running simulations
 # for a single parameter.
 np.random.seed(10)
 
-#REFRACTION, ACTIVATION, TOTAL_TIME in units of timesteps, BEES_SALT_LEN in mm!!!
 def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
-                CHANCE_TO_BE_ACTIVATABLE=0.58, CHANCE_OF_SALTATORY_PROP=0.001,
-                BEES_SALT_LEN=30.0, DISPLAY = False, TIME = True, plots=False, ret=False):
+                CHANCE_TO_BE_ACTIVATABLE=0.58, 
+                CHANCE_OF_SALTATORY_PROP=0.001, BEES_SALT_LEN=30.0, 
+                STRENGTH=10.0, PATTERN='geometric_scaled',RADIUS=3, EXP=1,
+                TIME = False, plots=False, ret=False, DISPLAY = False, 
+                MOVIE_SAVE=False,MOVIE_NAME='BEES'):
     """
     :param REFRACTION: how many ticks the bee must rest for between activations
     :param int ACTIVATION: how many ticks the bee will remain active for
     :param int TOTAL_TIME: The number of time steps the simulation will run for
-    :param double Threshold: The threshold value needed to be reached for a bee to activate
     :param double CHANCE_TO_BE_ACTIVATABLE: The probability that it is even possible to activate the bee
     :param double CHANCE_OF_SALTATORY_PROP: This is the probability that a bee activates in the far neighborhood
-    :param bool DISPLAY: Whether to show display or not
+    :param double BEES_SALT_LEN: saltatory radius in mm!!!
+    
+    Let's keep these parameters constant during parameter space searches:
+    :param double STRENGTH: sum of all elements of the relation matrix
+    :param string PATTERN: pattern of the relation matrix
+    :param int RADIUS: relation matrix size
+    :param double EXP: exponent to raise the relation matrix to (long vs. short range signalling)
+    
     :param bool TIME: Whether to time the length of code running
     :param bool plots: Whether to show the plots or not
     :param bool ret: whether or not to return simulation quantities
+    :param bool DISPLAY: Whether to show display or not
+    :param bool MOVIE_SAVE: Whether to save a movie with name:
+    :param string MOVIE_NAME
 
     :return list: Returns a list of quantities
 
@@ -64,15 +77,19 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
 
     # generate the hive surface, creating a 2 dim "array", with the same dim as the screen
     Hive = []
-    First_activations = []  # This records the time of first activation for a bee (excluding the generator)
-    for x in range(BEES_X_DIM):
-        Bee_col = []
-        Act_col = []
-        for y in range(BEES_Y_DIM):
-            Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, (1-ACTIVATION_MODE)*random() < CHANCE_TO_BE_ACTIVATABLE))
-            Act_col.append(-1)
-        Hive.append(Bee_col)
-        First_activations.append(Act_col)
+    HEX_GRID=False
+    if HEX_GRID:
+        for x in range(BEES_X_DIM):
+            Bee_col = []
+            for y in range(BEES_Y_DIM):
+                Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, np.mod(x+y,2)==1))
+                Hive.append(Bee_col)
+    else: #Square grid
+        for x in range(BEES_X_DIM):
+            Bee_col = []
+            for y in range(BEES_Y_DIM):
+                Bee_col.append(Bee_Files.Bee(REFRACTION, ACTIVATION, (1-ACTIVATION_MODE)*random() <= CHANCE_TO_BE_ACTIVATABLE))
+                Hive.append(Bee_col)                
 
 
     # This creates the generator bee; to be frank this could also have been done with a bit more elegance, but it was
@@ -82,7 +99,7 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
     Hive[generator_location[0]][generator_location[1]] = Bee_Files.GeneratorBee(REFRACTION, ACTIVATION, True)
 
     #R is the relation matrix. It calls a pattern from the helper file. Let's stick with geometric_scaled for simulations
-    R = Helper.relation_matrix('geometric_scaled',BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,10.0,3)
+    R = Helper.relation_matrix(PATTERN,BEES_X_WIDTH,BEES_Y_WIDTH,BEES_X_DIM,BEES_Y_DIM,STRENGTH,RADIUS)**EXP
     #S is the saltatoric matrix. Here I'vewritten it so it's the units that are less than or equal to
     #BEES_SALT_DIM (in units of mm!) away from (0,0).
     S=np.heaviside(BEES_SALT_LEN-DIST_MATRIX,1)
@@ -171,3 +188,22 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
         #Need to calculate average wavespeed and max number of participants
         #placeholders below
         return(["average wavespeed", TIME_STEP*WAVE_TIME, "max number of participants"])
+    
+    if MOVIE_SAVE:
+        FPS=20
+        fourcc = VideoWriter_fourcc(*'XVID')
+        video = VideoWriter(MOVIE_NAME+'.avi', fourcc, float(FPS), (BEES_X_DIM*BEES_X_SIZE, BEES_Y_DIM*BEES_Y_SIZE))
+        T_ACT_BEES=np.empty([TOTAL_TIME,BEES_Y_DIM, BEES_X_DIM,3])
+        T_ACT_BEES[:,:,:,0]=255*np.transpose(ACTIVE_BEES,axes=(0,2,1))
+        T_ACT_BEES[:,:,:,1]=255*np.transpose(ACTIVE_BEES,axes=(0,2,1))
+        T_ACT_BEES[:,:,:,2]=255*np.transpose(ACTIVE_BEES,axes=(0,2,1))
+        T_ACT_BEES=np.repeat(T_ACT_BEES,BEES_Y_SIZE,axis=1)
+        T_ACT_BEES=np.repeat(T_ACT_BEES,BEES_X_SIZE,axis=2)
+        
+        for t in range(TOTAL_TIME):
+           frame=(T_ACT_BEES[t]).astype(np.uint8)
+           video.write(frame)
+            
+        video.release()
+            
+            

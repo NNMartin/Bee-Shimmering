@@ -39,16 +39,16 @@ class Bee:
                 self.is_active = True
                 self.time_since_last_activation_pulse = 0
                 self.has_activated = True
-            elif self.is_active:
-                if self.time_since_last_activation_pulse >= self.activation_length:
-                    # This will trigger if the bee has already been active for its whole duration;
-                    # at which point it will stop
-                    self.is_active = False
-                    self.time_since_last_activation_pulse += 1  # This is because the next statement won't trigger
-                elif self.time_since_last_activation_pulse < (self.refraction_period + self.activation_length):
-                    # There's really no point to have a value of time_since_last_activation_pulse higher than
-                    # refraction_period + activation_length
-                    self.time_since_last_activation_pulse += 1
+
+            elif self.time_since_last_activation_pulse >= self.activation_length:
+                # This will trigger if the bee has already been active for its whole duration;
+                # at which point it will stop
+                self.is_active = False
+                self.time_since_last_activation_pulse += 1  # This is because the next statement won't trigger
+            elif self.time_since_last_activation_pulse < (self.refraction_period + self.activation_length):
+                # There's really no point to have a value of time_since_last_activation_pulse higher than
+                # refraction_period + activation_length
+                self.time_since_last_activation_pulse += 1
 
     def is_it_active(self):
         """
