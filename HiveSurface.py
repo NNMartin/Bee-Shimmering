@@ -178,6 +178,10 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
     
     SPEEDS[:WAVE_TIME]=np.sum(np.sum(SPEEDS_MATRIX,1),1)/NUMBER_PARTICIPANTS[:WAVE_TIME]
     
+    AVERAGE_SPEED=np.average(SPEED[10:np.argmax(NUMBER_PARTICIPANTS)])
+    STD_SPEED=np.std(SPEED[10:np.argmax(NUMBER_PARTICIPANTS)])
+    MAX_PARTICIPANTS=np.amax(NUMBER_PARTICIPANTS)
+    
     if plots:
         plt.figure()
         plt.plot(20*np.arange(TOTAL_TIME),NUMBER_PARTICIPANTS),plt.ylabel('Number Shimmering Bees'),plt.xlabel('time (ms)')
