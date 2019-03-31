@@ -210,4 +210,3 @@ def simulation(REFRACTION=40, ACTIVATION=3, TOTAL_TIME=60,
             
         video.release()
             
-            
